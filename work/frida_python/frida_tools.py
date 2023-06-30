@@ -14,11 +14,6 @@ def on_message(message, data):
         print("[ERROR] {}".format(message['description']))
 
 
-if __name__ == '__main__':
-    FRIDA_GET_BASE_ADDRESS().run(tool_input={"module_name": "libil2cpp.so"})
-
-
-
 class FRIDA_PS(BaseTool):
     name = "frida_ps"
     description = """使用frida的api来列出当前运行的进程，这个函数不需要传递参数"""
@@ -64,7 +59,7 @@ class FRIDA_GET_BASE_ADDRESS(BaseTool):
 
     def _run(self, module_name: str):
         devices = frida.get_usb_device()
-        session = devices.attach("金属小分队")
+        session = devices.attach("猜猜我谁")
         script = """
         rpc.exports = {
             testf: function (module_name, offset=0, length=0x60) {

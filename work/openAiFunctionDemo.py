@@ -2,7 +2,10 @@ import yfinance as yf
 from datetime import datetime, timedelta
 
 import langchain
-from work.frida_python.frida_tools import FRIDA_SPAWN, FRIDA_PS, FRIDA_GET_BASE_ADDRESS
+from work.tools.cmd.base import get_top_activity_info
+from work.tools.frida import frida_findBaseAddress, frida_ps, frida_spawn, frida_attach, frida_load_js_code, \
+    frida_exec_js_code_method
+from work.tools.frida.java import generate_java_hook_code
 
 
 def get_current_stock_price(ticker):
@@ -80,7 +83,7 @@ class StockPerformanceTool(BaseTool):
         raise NotImplementedError("get_stock_performance does not support async")
 
 
-from langchain.agents import AgentType
+from langchain.agents import AgentType, load_tools
 from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent
 from langchain.memory import ConversationBufferMemory
@@ -89,7 +92,7 @@ llm = ChatOpenAI(
     model="gpt-3.5-turbo-0613",
     temperature=0
 )
-langchain.debug = False
+langchain.debug = True
 
 from langchain.prompts import MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
@@ -97,22 +100,18 @@ from langchain.memory import ConversationBufferMemory
 agent_kwargs = {
     "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
 }
+
 memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
 
 if __name__ == '__main__':
     tools = [
-        FRIDA_SPAWN(),
-        FRIDA_PS(),
-        FRIDA_GET_BASE_ADDRESS(),
-    ]
+             generate_java_hook_code(), frida_attach(), frida_load_js_code(), frida_exec_js_code_method()]
 
     agent = initialize_agent(tools=tools, llm=llm,
                              agent=AgentType.OPENAI_FUNCTIONS,
                              agent_kwargs=agent_kwargs,
                              memory=memory,
-                             verbose=False)
-
-    print(agent.run("查询模块名'libil2cpp.so'的基地值是多少"))
+                             verbose=True)
 
     while True:
-        print(agent.run(input(">>> ")))
+        print(agent.run(input(">")))
