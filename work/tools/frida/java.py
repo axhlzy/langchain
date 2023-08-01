@@ -25,18 +25,14 @@ class generate_java_hook_code(BaseTool):
                 frida to hook java. For example, I want to hook java's startActivity method to monitor the start of the 
                 activity and print the stack, information for me at the same time. You should generate the code in the 
                 following format, and only return this part of the code without any other content.
-                the code part is between >>> and <<< 
+                the code part is between >>> and <<< , make sure your return is json format.
+                your code should be like this, don't contain >>> and <<<, just runnable code.
                 >>>
                 rpc.exports = {{
                     tmpFunction: function () {{
                         if (Java.available) {{
                             Java.perform(function () {{
-                                var Activity = Java.use('android.app.Activity');
-                                Activity.startActivity.overload('android.content.Intent').implementation = function (intent) {{
-                                    console.log(Java.use('android.util.Log').getStackTraceString(Java.use('java.lang.Exception').$new()));
-                                    console.log('Starting activity: ' + intent);
-                                    this.startActivity.overload('android.content.Intent').call(this, intent);
-                                }};
+                                // todo some detail things
                             }});
                             return 'Success to hook startActivity.'
                         }} else {{

@@ -35,7 +35,7 @@ def get_stock_performance(ticker, days):
 
 from typing import Type
 from pydantic import BaseModel, Field
-from langchain.tools import BaseTool
+from langchain.tools import BaseTool, ShellTool, JsonListKeysTool
 
 
 class CurrentStockPriceInput(BaseModel):
@@ -92,7 +92,7 @@ llm = ChatOpenAI(
     model="gpt-3.5-turbo-0613",
     temperature=0
 )
-langchain.debug = True
+langchain.debug = False
 
 from langchain.prompts import MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
@@ -104,8 +104,9 @@ agent_kwargs = {
 memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
 
 if __name__ == '__main__':
-    tools = [
-             generate_java_hook_code(), frida_attach(), frida_load_js_code(), frida_exec_js_code_method()]
+    # tools = [generate_java_hook_code(), frida_attach(), frida_load_js_code(), frida_exec_js_code_method()]
+    tools = [ShellTool(), ]
+
 
     agent = initialize_agent(tools=tools, llm=llm,
                              agent=AgentType.OPENAI_FUNCTIONS,
@@ -113,5 +114,6 @@ if __name__ == '__main__':
                              memory=memory,
                              verbose=True)
 
+    # attach 猜猜我谁 then genereate some js code to hook all methods of this class : com.unity3d.player.UnityPlayer,print their parameters
     while True:
         print(agent.run(input(">")))

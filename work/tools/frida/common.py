@@ -88,7 +88,7 @@ class frida_findBaseAddress(FridaBaseTool):
 
 class frida_load_js_code_input(BaseModel):
     """Inputs for frida_load_js_code"""
-    js_code: str = Field(description="需要加载的js文本内容")
+    js_code: str = Field(description="需要加载的js文本内容，这个参数类型是string")
 
 
 class frida_load_js_code(FridaBaseTool):
@@ -96,14 +96,14 @@ class frida_load_js_code(FridaBaseTool):
     description = """使用frida的api来加载一个js脚本，加载脚本前得先附加上应用，这里的入脚本可以是我们自己生成的也可以是自己写的"""
     args_schema: Type[BaseModel] = frida_load_js_code_input
 
-    def _run(self, js_code, *args: Any, **kwargs: Any):
+    def _run(self, js_code: str, *args: Any, **kwargs: Any):
         self.devices = frida.get_usb_device()
         self.session = self.devices.attach(self.current_pkg_name)
         self.script = self.session.create_script(js_code)
         self.script.on('message', self.on_message)
         return self.script.load()
 
-    def _arun(self, ticker: str):
+    def _arun(self, js_code: str):
         raise NotImplementedError("frida_spawn does not support async")
 
 
